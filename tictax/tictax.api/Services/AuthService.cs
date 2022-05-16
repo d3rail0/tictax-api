@@ -38,7 +38,7 @@ namespace tictax.api.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public string CreateTokenAsync(UserDto user)
+        public string CreateToken(AuthRequest user)
         {
             List<Claim> claims = new List<Claim>
             {
@@ -53,7 +53,7 @@ namespace tictax.api.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
@@ -79,7 +79,7 @@ namespace tictax.api.Services
             }
         }
 
-        public async Task<bool> RegisterAccount(UserDto user)
+        public async Task<bool> RegisterAccount(AuthRequest user)
         {
             // Get user from user repo
             User modUser = await _userService.GetUserAsync(user.Username);
@@ -95,8 +95,12 @@ namespace tictax.api.Services
             CreatePasswordHash(user.Password, out byte[] pHash, out byte[] pSalt);
 
             // Apply hash and salt to selected user
+            modUser = new User();
+            modUser.Username = user.Username;
             modUser.PasswordSalt = pSalt;
             modUser.PasswordHash = pHash;
+
+            await _unitOfWork.Users.Add(modUser);
 
             // Save changes in unit of work
             await _unitOfWork.CompleteAsync();
@@ -104,7 +108,7 @@ namespace tictax.api.Services
             return true;
         }
 
-        public async Task<bool> VerifyCredentials(UserDto user)
+        public async Task<bool> VerifyCredentials(AuthRequest user)
         {
             // Get user from user repo
             User modUser = await _userService.GetUserAsync(user.Username);

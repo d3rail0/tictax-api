@@ -11,9 +11,9 @@ namespace tictax.api.Services.Interfaces
         /// </summary>
         /// <param name="user"></param>
         /// <returns>true if account was successfully registered.</returns>
-        public Task<bool> RegisterAccount(UserDto user);
+        public Task<bool> RegisterAccount(AuthRequest user);
 
-        public string CreateTokenAsync(UserDto user);
+        public string CreateToken(AuthRequest user);
 
         /// <summary>
         /// Verifies whether user credentials are valid
@@ -21,7 +21,7 @@ namespace tictax.api.Services.Interfaces
         /// </summary>
         /// <param name="user"></param>
         /// <returns>true is credentials are valid.</returns>
-        public Task<bool> VerifyCredentials(UserDto user);
+        public Task<bool> VerifyCredentials(AuthRequest user);
 
     }
 }

@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using tictax.api.Data.Models;
+using tictax.api.Helpers;
 using tictax.api.Services.Interfaces;
 
 namespace tictax.api.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [Authorize]
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
@@ -33,10 +34,49 @@ namespace tictax.api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("register")]
-        public async Task<ActionResult<AuthToken>> Register(UserDto request)
+        public async Task<ActionResult<AuthResponse>> Register(AuthRequest request)
         {
-            return Ok(request);
+            bool isSuccessful = await _authService.RegisterAccount(request);
+            
+            if(!isSuccessful)
+            {
+                return BadRequest(
+                    new ErrorResponse(
+                        Constants.ErrorCodes.UserAlreadyExists, 
+                        "Account already exists or input data is invalid"));
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("login")]
+        public async Task<ActionResult<AuthResponse>> Login(AuthRequest request)
+        {
+            bool isInputValid = await _authService.VerifyCredentials(request);
+            
+            if (!isInputValid)
+            {
+                return BadRequest(
+                    new ErrorResponse(
+                        Constants.ErrorCodes.WrongPassword, 
+                        "Entered credentials are invalid"));
+            }
+
+            string token = _authService.CreateToken(request);
+
+            return Ok(new AuthResponse() { Token = token });
+        }
+
+        [HttpGet]
+        [Route("profile")]
+        public IActionResult GetMyProfile()
+        {
+            var username = _userService.GetMyUsername();
+            return Ok(username);
         }
 
 

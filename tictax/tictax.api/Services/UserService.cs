@@ -1,8 +1,11 @@
 ﻿using entities.Model;
 using entities.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using tictax.api.Helpers;
 using tictax.api.Services.Interfaces;
 
 namespace tictax.api.Services
@@ -28,6 +31,29 @@ namespace tictax.api.Services
                 result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
             }
             return result;
+        }
+
+        public DateTime GetExpiryDate()
+        {
+            DateTime result = DateTime.UtcNow;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+
+                long unixTime = Convert.ToInt64(_httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "exp").Value);
+                result = DateHelper.UnixTimestampToDateTime(unixTime);
+            }
+            return result;
+        }
+
+        public bool IsTokenExpired()
+        {
+            DateTime currTime = DateTime.UtcNow;
+            DateTime expiryDate = GetExpiryDate();
+            if (DateTime.Compare(currTime, expiryDate) <= 0)
+            {
+                return false;
+            }
+            return true;
         }
 
         public async Task<User> GetUserAsync(string username)

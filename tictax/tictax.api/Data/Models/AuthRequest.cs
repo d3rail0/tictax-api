@@ -2,7 +2,7 @@
 
 namespace tictax.api.Data.Models
 {
-    public class UserDto
+    public class AuthRequest
     {
         [Required]
         [StringLength(32, MinimumLength = 3, ErrorMessage = "Username length must be in range [3, 32]")]
