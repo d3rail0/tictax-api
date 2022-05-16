@@ -77,28 +77,30 @@ namespace tictax.api
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
-
-            string plain_text_key = Environment.GetEnvironmentVariable("TICTAX_JWT_KEY");
-
-            if (plain_text_key == null)
+            if (Program.IsStartedWithMain)
             {
-                throw new Exception("JWT key not set!");
-            }
+                string plain_text_key = Environment.GetEnvironmentVariable("TICTAX_JWT_KEY");
 
-            byte[] sym_key = Encoding.UTF8.GetBytes(plain_text_key);
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+                if (plain_text_key == null)
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(sym_key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+                    throw new Exception("JWT key not set!");
+                }
 
+                byte[] sym_key = Encoding.UTF8.GetBytes(plain_text_key);
+
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(sym_key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+            }
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

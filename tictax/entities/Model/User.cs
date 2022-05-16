@@ -17,8 +17,10 @@ namespace entities.Model
         public byte[] PasswordHash { get; set; }
         [Required]
         public byte[] PasswordSalt { get; set; }
-        public DateTime TokenCreated { get; set; }
-        public DateTime TokenExpires { get; set; }
+
+        public int TotalWins { get; set; } = 0;
+        public int TotalLoses { get; set; } = 0;
+        public int TotalGames { get; set; } = 0;
     }
 
 }
