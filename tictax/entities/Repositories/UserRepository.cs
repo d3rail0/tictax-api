@@ -12,8 +12,8 @@ namespace entities.Repositories
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
 
-        public UserRepository(AppDbContext appDbContext, ILogger logger) :
-            base(appDbContext, logger)  
+        public UserRepository(AppDbContext appDbContext) :
+            base(appDbContext)  
         {
 
         }

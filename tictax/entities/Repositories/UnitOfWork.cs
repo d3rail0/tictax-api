@@ -13,8 +13,6 @@ namespace entities.Repositories
 
         private readonly AppDbContext _appDbContext;
 
-        private readonly ILogger _logger;
-
         public IUserRepository Users { get; private set; }
 
         public UnitOfWork(
@@ -23,9 +21,8 @@ namespace entities.Repositories
             )
         {
             _appDbContext = appDbContext;
-            _logger = loggerFactory.CreateLogger<UnitOfWork>();
 
-            Users = new UserRepository(_appDbContext, _logger);
+            Users = new UserRepository(_appDbContext);
 
         }
 

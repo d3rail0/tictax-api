@@ -12,6 +12,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using entities;
 using Microsoft.EntityFrameworkCore;
+using entities.Repositories.Interfaces;
+using entities.Repositories;
+using tictax.api.Services.Interfaces;
+using tictax.api.Services;
 
 namespace tictax.api
 {
@@ -39,12 +43,20 @@ namespace tictax.api
                     });
                 });
 
+            services.AddHttpContextAccessor();
+
             // Setup connection to the database
             services.AddDbContext<AppDbContext>(opts =>
              opts.UseSqlServer(Configuration["MyDatabase:DefaultConnection"],
                 options => options.MigrationsAssembly("tictax.api")));
 
-            // Registering services
+            // Register repositories
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IUserRepository, UserRepository>();
+
+            // Register services
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IAuthService, AuthService>();
 
 
             services.AddControllers();

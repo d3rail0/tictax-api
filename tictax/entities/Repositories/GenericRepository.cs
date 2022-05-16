@@ -14,13 +14,11 @@ namespace entities.Repositories
     {
 
         protected readonly AppDbContext _appDbContext;
-        protected readonly ILogger _logger;
         protected DbSet<TEntity> _dbSet;
 
-        public GenericRepository(AppDbContext appDbContext, ILogger logger)
+        public GenericRepository(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
-            _logger = logger;
             _dbSet = appDbContext.Set<TEntity>();
         }
 
