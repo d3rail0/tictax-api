@@ -13,7 +13,8 @@
       "commandName": "IISExpress",
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TICTAX_JWT_KEY": "definitely not a secret key"
       }
     },
     "tictax.api": {

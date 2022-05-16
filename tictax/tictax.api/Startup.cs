@@ -62,7 +62,6 @@ namespace tictax.api
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthService, AuthService>();
 
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -78,8 +77,15 @@ namespace tictax.api
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
-            // TODO: Load key from txt file
-            byte[] sym_key = Encoding.UTF8.GetBytes("not_so_secret_key");
+
+            string plain_text_key = Environment.GetEnvironmentVariable("TICTAX_JWT_KEY");
+
+            if (plain_text_key == null)
+            {
+                throw new Exception("JWT key not set!");
+            }
+
+            byte[] sym_key = Encoding.UTF8.GetBytes(plain_text_key);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -107,6 +113,7 @@ namespace tictax.api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
