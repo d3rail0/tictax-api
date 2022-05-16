@@ -20,6 +20,8 @@ using tictax.api.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore.Filters;
+using System.Net;
+using System.IO;
 
 namespace tictax.api
 {
@@ -117,6 +119,29 @@ namespace tictax.api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    string[] allowedAnonymousFiles = { "index.html", "register.html", "login.js", "register.js" };
+
+                    if (ctx.File.Name.EndsWith(".png") || ctx.File.Name.EndsWith(".jpg") ||
+                        allowedAnonymousFiles.Contains(ctx.File.Name))
+                    {
+                        return;
+                    }
+
+                    if (ctx.Context.User.Identity.IsAuthenticated)
+                    {
+                        return;
+                    }
+
+                    ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    ctx.Context.Response.ContentLength = 0;
+                    ctx.Context.Response.Body = Stream.Null;
+                }
+            });
 
             app.UseEndpoints(endpoints =>
             {
