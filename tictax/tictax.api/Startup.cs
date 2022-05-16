@@ -27,10 +27,25 @@ namespace tictax.api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddCors(options =>
+                {
+                    options.AddPolicy("AllowAny", builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+                });
 
+            // Setup connection to the database
             services.AddDbContext<AppDbContext>(opts =>
              opts.UseSqlServer(Configuration["MyDatabase:DefaultConnection"],
                 options => options.MigrationsAssembly("tictax.api")));
+
+            // Registering services
+
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
