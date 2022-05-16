@@ -55,12 +55,12 @@ namespace tictax.api
                 options => options.MigrationsAssembly("tictax.api")));
 
             // Register repositories
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             // Register services
-            services.AddTransient<IUserService, UserService>();
-            services.AddTransient<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

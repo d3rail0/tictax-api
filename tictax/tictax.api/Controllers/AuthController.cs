@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using tictax.api.Data.Models;
 using tictax.api.Services.Interfaces;
 
 namespace tictax.api.Controllers
 {
     [ApiController]
-    [Authorize]
-    [Route("api/[controller]")]
+    //[Authorize]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
 
@@ -30,6 +31,14 @@ namespace tictax.api.Controllers
             _authService = authService;
             _userService = userService;
         }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<ActionResult<AuthToken>> Register(UserDto request)
+        {
+            return Ok(request);
+        }
+
 
     }
 }

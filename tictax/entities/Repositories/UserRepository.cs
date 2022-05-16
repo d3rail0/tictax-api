@@ -18,7 +18,7 @@ namespace entities.Repositories
 
         }
 
-        public async Task<User> GetByUsername(string username)
+        public async Task<User> GetByUsernameAsync(string username)
         {
             return await _dbSet.FindAsync(username);   
         }

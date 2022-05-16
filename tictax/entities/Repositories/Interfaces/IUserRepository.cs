@@ -10,7 +10,7 @@ namespace entities.Repositories.Interfaces
     public interface IUserRepository : IGenericRepository<User>
     {
 
-        public Task<User> GetByUsername(string username);
+        public Task<User> GetByUsernameAsync(string username);
 
     }
 }
