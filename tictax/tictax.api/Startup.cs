@@ -122,26 +122,39 @@ namespace tictax.api
 
             app.UseStaticFiles(new StaticFileOptions
             {
-                OnPrepareResponse = ctx =>
-                {
-                    string[] allowedAnonymousFiles = { "index.html", "register.html", "login.js", "register.js" };
+                //OnPrepareResponse = ctx =>
+                //{
+                //    string[] allowedAnonymousFiles = { "index.html", "register.html", "auth.js", "authStyle.css" };
 
-                    if (ctx.File.Name.EndsWith(".png") || ctx.File.Name.EndsWith(".jpg") ||
-                        allowedAnonymousFiles.Contains(ctx.File.Name))
-                    {
-                        return;
-                    }
+                //    // Allow all js and css libs
+                //    if (ctx.File.PhysicalPath.Contains("\\wwwroot\\lib\\"))
+                //    {
+                //        return;
+                //    }
 
-                    if (ctx.Context.User.Identity.IsAuthenticated)
-                    {
-                        return;
-                    }
+                //    // Allow access to all images
+                //    if (ctx.File.PhysicalPath.Contains("\\wwwroot\\img\\"))
+                //    {
+                //        return;
+                //    }
 
-                    ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    ctx.Context.Response.ContentLength = 0;
-                    ctx.Context.Response.Body = Stream.Null;
-                }
+                //    if (allowedAnonymousFiles.Contains(ctx.File.Name))
+                //    {
+                //        return;
+                //    }
+
+                //    if (ctx.Context.User.Identity.IsAuthenticated)
+                //    {
+                //        return;
+                //    }
+
+                //    ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                //    ctx.Context.Response.ContentLength = 0;
+                //    ctx.Context.Response.Body = Stream.Null;
+                //}
             });
+
+            app.UseDefaultFiles();
 
             app.UseEndpoints(endpoints =>
             {
