@@ -1,12 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login page</title>
+    <title>Authentication</title>
+
+    <link rel='stylesheet' href='/lib/bootstrap/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='/lib/fonts/font-awesome.min.css'>
+
+    <link rel='stylesheet' href='/css/authStyle.css'>
+
+
+    <script src='/lib/bootstrap/js/bootstrap.bundle.min.js'></script>
+    <script src='/lib/jquery/js/jquery.min.js'></script>
+    <script src='/js/auth.js'></script>
+
 </head>
+
 <body>
-    
+
+    <div class="container-fluid fixed-top p-5 bg-primary text-white text-center">
+        <h1 class="display-4">TICTAX</h1>
+        <p class="lead">Play tic tac toe with anyone on the Internet</p>
+    </div>
+    <main>
+        <div class="container-fluid">
+            <div class="row align-items-center vh-100">
+                <div class="col-12 col-md-auto mb-4 mx-auto">
+
+                    <div class="card shadow noborder mx-auto">
+
+                        <div class="btn-group nav" role="group" aria-label="Basic radio toggle button group">
+                            <input type="radio" class="btn-check nav-link active" name="btnradio" id="btnradio1" autocomplete="off" checked data-bs-toggle="tab" data-bs-target="#login" aria-controls="login" aria-selected="true">
+                            <label class="btn btn-outline-primary" for="btnradio1">Login</label>
+
+                            <input type="radio" class="btn-check nav-link" name="btnradio" id="btnradio2" autocomplete="off" data-bs-toggle="tab" data-bs-target="#signup" aria-controls="signup" aria-selected="false">
+                            <label class="btn btn-outline-primary" for="btnradio2">Signup</label>
+                        </div>
+
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="pills-login-tab">
+                                <div class="form px-4 pt-5">
+
+                                    <input type="text" id="loginUsername" name="" class="form-control" placeholder="Username">
+                                    <input type="password" id="loginPassword" name="" class="form-control" placeholder="Password">
+                                    <button id="cmdLogin" class="btn btn-dark btn-block">Login</button>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="pills-signup-tab">
+                                <div class="form px-4">
+
+                                    <input type="text" id="signupUsername" name="" class="form-control" placeholder="Username">
+                                    <input type="text" name="" class="form-control" placeholder="Email">
+                                    <input type="password" id="signupPassword" name="" class="form-control" placeholder="Password">
+                                    <button id="cmdSignup" class="btn btn-dark btn-block">Signup</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="position-fixed bottom-0 end-0 p-3 mb-4" style="z-index: 9999">
+        <div id="liveToast" class="toast hide bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="toast-header bg-danger text-white" id="toastHeader">
+                <strong class="me-auto" id="toastHeaderText">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <p id="toastMessage">Message</p>
+            </div>
+        </div>
+    </div>
+
+
+
 </body>
+
 </html>
