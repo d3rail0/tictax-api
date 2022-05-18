@@ -1,0 +1,40 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.content {
+    max-width: 500px;
+}
+
+.table-wrapper {
+    height: 535px;
+    max-height: 535px;
+    width: 100%;
+    overflow: auto;
+    display: inline-block;
+}
+
+.table-earnings {
+    background: #F3F5F6;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+}
+
+td {
+    word-break: break-all;
+}
+
+table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}

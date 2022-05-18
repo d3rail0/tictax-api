@@ -10,7 +10,8 @@
     <link rel='stylesheet' href='/lib/bootstrap/css/bootstrap.min.css'>
     <link rel='stylesheet' href='/lib/fonts/font-awesome.min.css'>
 
-    <link rel='stylesheet' href='/css/authStyle.css'>
+    <link rel='stylesheet' href='/css/scrollbar.css'>
+    <link rel='stylesheet' href='/css/lobbyStyle.css'>
 
 
     <script src='/lib/bootstrap/js/bootstrap.bundle.min.js'></script>
@@ -21,9 +22,59 @@
 
 <body>
 
-    <div class="container-fluid fixed-top p-5 bg-dark text-white text-center">
-        <h1 class="display-4">TICTAX</h1>
-        <p class="lead">LOBBY</p>
+    <div class="container-fluid p-2 bg-dark text-white text-center">
+        <h1 class="display-6">TICTAX</h1>
+        <p class="lead">Lobby</p>
+    </div>
+
+    <div class="container-fluid content">
+        <div class="row d-flex justify-content-center">
+            <div class="col d-flex flex-column justify-content-center align-items-center">
+
+                <p id="totalRoomsText" class='display-6 mt-3 text-white'>
+                    Total rooms: 0
+                </p>
+
+                <p id="activeRoomsText" class='display-6 mt-2 text-white'>
+                    Available rooms: 0
+                </p>
+
+                <div class="vstack gap-3 mx-auto mt-3">
+                    <button type="button" class="btn btn-lg btn-success">Create a room</button>
+                </div>
+
+                <div class="vstack gap-3 mx-auto mt-2">
+                    <button type="button" class="btn btn-warning">Refresh rooms</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid content border p-0 mt-5" id="serverContainer">
+        <div class="row">
+            <div class="col">
+                <div class="table-wrapper sc2">
+                    <table class="table table-dark table-striped">
+                        <thead class="table-light text-center header">
+                            <th scope="col" class="col-4">Room ID</th>
+                            <th scope="col" class="col">Creator</th>
+                            <th scope="col" class="col-2">[Press]</th>
+                        </thead>
+                        <tbody id="roomTable" class="text-white text-center align-middle">
+                            <tr id="room_ID">
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning" callback="">Join</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 

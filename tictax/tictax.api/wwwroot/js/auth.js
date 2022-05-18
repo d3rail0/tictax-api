@@ -96,7 +96,7 @@ $(document).ready(function() {
                 // Redirect to game lobby with newly received token
                 showInfo('You have successfully logged in');
                 localStorage.setItem('tictax_jwt_token', data.token);
-                console.log('Received tokaen: ' + localStorage.getItem('tictax_jwt_token') + ' ' + typeof(data.token));
+                console.log('Received token: ' + localStorage.getItem('tictax_jwt_token') + ' ' + typeof(data.token));
                 setTimeout(function() {
                     window.location.href = './lobby.html';
                 }, 1000);
