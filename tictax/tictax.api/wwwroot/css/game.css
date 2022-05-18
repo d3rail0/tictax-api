@@ -1,0 +1,61 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    height: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.flex-fill {
+    flex: 1 1 auto;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.no-focus:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.gameBtn {
+    background-color: rgb(102, 102, 104);
+    border-radius: 0 !important;
+    border: 0;
+    width: 33%;
+    height: 33%;
+    font-size: 5rem;
+}
+
+.mainContent {
+    background-color: rgb(60 133 255);
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 0.3rem;
+    background-color: #6ddaff;
+}
+
+.square {
+    height: 7rem;
+    width: 7rem;
+    background-color: rgb(40 63 173);
+    border: none;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    transition: font-size 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: font-size;
+}
+
+.square:active {
+    font-size: 4.2rem;
+}
