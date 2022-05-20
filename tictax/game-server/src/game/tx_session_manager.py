@@ -5,6 +5,7 @@ import settings
 from src.metabase import *
 from src.game.tx_session import *
 from src.game.player import Player
+import src.game.protocol.msg_types as mtypes
 
 class TxSessionManager(metaclass=MetaBase):
     """ TxSessionManager will be creating game session when
@@ -16,7 +17,9 @@ class TxSessionManager(metaclass=MetaBase):
     def __init__(self) -> None:
         self.__logger: Log
 
-        self.tx_sessions: dict[str, TxSession] = {}
+        self.session_id = 1;
+
+        self.tx_sessions: dict[int, TxSession] = {}
 
         # client_id --> player object
         self.connected_players: dict[int, Player] = {} 
@@ -29,10 +32,40 @@ class TxSessionManager(metaclass=MetaBase):
 
     def force_disconnect_client(self, client: dict, server):
         self.__logger.warning(f"[TxSessionmanager] -> Force disconnected client {client['id']}")
-        self.connected_players.pop(client['id'], None)
         server.disconnect_client(client)
 
-    def handle_message(self, client: dict, server, message: str) -> None:
+    def on_client_disconnected(self, client: dict, server) -> None:
+        # Check this client's opponent and notify them about 
+        # the leave
+        self.connected_players.pop(client['id'], None)
+
+    def send_error(self, player: Player, message: str) -> None:
+        self.__logger.warning(f"Sending error message to '{player.username}' -> {message}")
+        err_msg = mtypes.ErrorMessage(message)
+        player.ws_handler.send_message(err_msg.to_json())
+
+    def create_match(self, player: Player, server, json_data: dict) -> None:
+
+        if player.is_playing():
+            # Player is already playing so 
+            # we don't allow him to create new matches
+            self.send_error(player, "You are already active in another match!");
+            return
+
+        # Create a TxSession object and assign current player
+        player.active_tx_session_id = self.session_id
+
+
+        self.session_id += 1
+    
+    def join_match(self, player: Player, server, json_data: dict) -> None:
+        pass
+    
+    def leave_match(self, player: Player, server, json_data: dict) -> None:
+        pass
+
+
+    def handle_message(self, raw_client: dict, server, message: str) -> None:
         # Create match --> creates new session
         # Join match --> joins active session by id
         # Authenticate --> should only contain jwt token
@@ -46,15 +79,15 @@ class TxSessionManager(metaclass=MetaBase):
             json_data = json.loads(message)
             msg_type = json_data['type']
 
-            player: Player = self.connected_players.get(client['id'], None) 
+            player: Player = self.connected_players.get(raw_client['id'], None) 
 
-            if msg_type == 'auth':
+            if msg_type == mtypes.AUTH:
 
                 try:
-                    print(self.sym_key)
-                    json_decoded = jwt.decode(json_data['token'], self.sym_key, algorithms=["HS512"])
+                    auth_details: mtypes.Auth = mtypes.apply_schema_conv(mtypes.Auth, json_data)
+                    json_decoded = jwt.decode(auth_details.token, self.sym_key, algorithms=["HS512"])
                     player = Player(
-                        client['id'],
+                        raw_client,
                         json_decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'], 
                         json_decoded['exp']
                     )
@@ -69,17 +102,28 @@ class TxSessionManager(metaclass=MetaBase):
             if player is None:
                 # Client sent their first message and it didn't
                 # contain authentication token
-                self.force_disconnect_client(client, server)
+                self.force_disconnect_client(raw_client, server)
 
             # ==========================================================
+
+            if msg_type == mtypes.CREATE_MATCH:
+                self.create_match(player, server, json_data)
+            elif msg_type == mtypes.JOIN_MATCH:
+                self.join_match(player, server, json_data)
+            elif msg_type == mtypes.LEAVE_MATCH:
+                self.leave_match(player, server, json_data)
+            else:
+                # Pass the message to an actual session
+                pass
+
 
         except Exception as ex:
 
             # Check if the player was authenticated
-            if not client['id'] in self.connected_players:
-                server.disconnect_client(client)
+            if not raw_client['id'] in self.connected_players:
+                server.disconnect_client(raw_client)
 
-            self.__logger.exception(f"[TxSessionManager] -> Error in handle_message() | ClientId {client['id']} received message: " + message)
+            self.__logger.exception(f"[TxSessionManager] -> Error in handle_message() | ClientId {raw_client['id']} received message: " + message)
 
 
 

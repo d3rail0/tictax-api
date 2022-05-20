@@ -48,6 +48,7 @@ class GameServerManager(metaclass=MetaBase):
         if client is None:
             return
         
+        self.tx_session_manager.on_client_disconnected(client, server)
         self.__logger.info(f'Client({client["id"]}) diconnected')
 
     # Called when a client sends a message
@@ -57,6 +58,6 @@ class GameServerManager(metaclass=MetaBase):
             return
 
         self.__logger.info(f'Client({client["id"]}) said: {message}')
-
+        
         # Pass the message to the SessionManager
         self.tx_session_manager.handle_message(client, server, message)
