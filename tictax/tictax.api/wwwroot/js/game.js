@@ -19,3 +19,46 @@ function resetGame() {
     })
     overlayElement.style.display = "none";
 }
+
+
+var socket = undefined;
+const WS_ADDRESS = 'ws://127.0.0.1:13024';
+
+const initSocket = (address) => {
+
+    if (socket != null && socket.readyState === socket.OPEN) {
+        socket.close();
+    }
+
+    // Create WebSocket connection.
+    socket = new WebSocket(address);
+
+    // Connection opened
+    socket.addEventListener('open', function(event) {
+        socket.send('Hello Server!');
+    });
+
+    // Listen for messages
+    socket.addEventListener('message', function(event) {
+        console.log('Message from server ', event.data);
+    });
+
+    // Listen for messages
+    socket.addEventListener('close', function(event) {
+        console.log('## CLOSED ##');
+        const reason = event.reason;
+        const code = event.code;
+
+        console.log('code: ' + code);
+        console.log('reason: ' + reason);
+    });
+
+    // Listen for messages
+    socket.addEventListener('error', function(event) {
+        console.log('## ERROR ##');
+        console.log(event)
+    });
+
+}
+
+initSocket(WS_ADDRESS);
