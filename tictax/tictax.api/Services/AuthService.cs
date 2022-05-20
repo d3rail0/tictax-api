@@ -47,9 +47,9 @@ namespace tictax.api.Services
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                 Environment.GetEnvironmentVariable("TICTAX_JWT_KEY"))
-                );
+            );
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
             var token = new JwtSecurityToken(
                 claims: claims,
