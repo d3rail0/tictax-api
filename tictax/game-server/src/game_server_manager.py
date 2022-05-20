@@ -1,9 +1,9 @@
 from websocket_server import WebsocketServer
 from global_logger import Log
 import threading 
-import traceback
 
-from src.metabase import *
+from src.metabase import MetaBase
+from src.game.tx_session_manager import TxSessionManager
 
 class WebsocketServerEx(WebsocketServer):
 
@@ -18,7 +18,7 @@ class WebsocketServerData:
 
 class GameServerManager(metaclass=MetaBase):
 
-    MAX_MESSAGE_LEN = 128
+    MAX_MESSAGE_LEN = 1024
 
     def __init__(self, config: dict) -> None:
         self.__logger: Log
@@ -30,6 +30,8 @@ class GameServerManager(metaclass=MetaBase):
         self.ws_srv_data.server.set_fn_client_left(self.client_left)
         self.ws_srv_data.server.set_fn_message_received(self.message_received)
 
+        self.tx_session_manager = TxSessionManager()
+        
     def start_bgw(self):
         self.__logger.info("Starting websocket server...")
         self.x = threading.Thread(target=self.ws_srv_data.server.run_forever, args=(), daemon=True)
@@ -53,11 +55,8 @@ class GameServerManager(metaclass=MetaBase):
         if len(message) > self.MAX_MESSAGE_LEN:
             self.__logger.error(f'Client({client["id"]}) sent message: {message[0:self.MAX_MESSAGE_LEN]}... [EXCEEDED LIMIT: {len(message)}]')
             return
-            
+
         self.__logger.info(f'Client({client["id"]}) said: {message}')
 
-        # Verify that JWT token hasn't expired
-        if message[0] == '3':
-            self.ws_srv_data.server.disconnect_client(client)
-
-        # Pass the message to the MessageHandler
+        # Pass the message to the SessionManager
+        self.tx_session_manager.handle_message(client, server, message)
