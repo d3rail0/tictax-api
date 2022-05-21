@@ -11,6 +11,7 @@ ERROR        = 'error'
 GAME_STATE   = 'gs'
 GAME_END     = 'ge'
 PLAYER_DISCONNECTED = 'p_disconn'
+PLAY_MOVE = 'move'
 # ----------------------------------
 
 def apply_schema_conv_multi(type:JsonSchemaMixin, results:dict) -> dict[str, type]:
@@ -45,14 +46,16 @@ class GameState(JsonSchemaMixin):
     match_id: int
     board: list[list[str]]
     valid_moves: list[int]
+    opponent: str
 
-    def __init__(self, tx_game) -> None:
+    def __init__(self, tx_game, opponent="") -> None:
         super().__init__()
 
         self.type = GAME_STATE
         self.match_id = tx_game.match_id
         self.board = tx_game.board
         self.valid_moves = list(tx_game.available_moves())
+        self.opponent = opponent
 
 @dataclass
 class PlayerDisonnected(JsonSchemaMixin):
@@ -68,3 +71,27 @@ class PlayerDisonnected(JsonSchemaMixin):
         self.type = PLAYER_DISCONNECTED
         self.match_id = match_id
         self.goto_lobby = goto_lobby
+
+@dataclass
+class PlayMove(JsonSchemaMixin):
+    type: str
+    match_id: int
+    cell: int
+
+@dataclass
+class GameEnd(JsonSchemaMixin):
+    type: str
+    match_id: int
+    winner: str
+    is_tie: bool
+
+    # username -> win count
+    score: dict[str, int]
+
+    def __init__(self, match_id, winner, is_tie, score: dict[str, int]) -> None:
+        super().__init__()
+        self.type = GAME_END
+        self.match_id = match_id
+        self.winner = winner
+        self.is_tie = is_tie
+        self.score = score

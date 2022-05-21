@@ -36,9 +36,9 @@ class TxGame(metaclass=MetaBase):
             9 : (2, 2)
         }
 
-    def state_to_json(self) -> str:
-        game_state_msg = mtypes.GameState(self)
-        return game_state_msg.to_json()
+    def get_state(self) -> mtypes.GameState:
+        game_state = mtypes.GameState(self)
+        return game_state
 
     def available_moves(self) -> dict[int]:
         return self.cells.keys()
@@ -55,8 +55,10 @@ class TxGame(metaclass=MetaBase):
         if cell not in self.available_moves():
             return False
 
-        self.board[self.cells[cell]] = symbol
+        i, j = self.cells[cell]
+        self.board[i][j] = symbol
         self.cells.pop(cell)
+        self.last_move_played = symbol
 
         return True
 
@@ -75,7 +77,7 @@ class TxGame(metaclass=MetaBase):
 
     def get_winner(self):
         for newBoard in [self.board, np.transpose(self.board)]:
-            result = self.__check_rows(newBoard)
+            result = self.__check_rows()
             if result:
                 return result
         return self.__check_diagonals()

@@ -34,17 +34,12 @@ class TxSessionManager(metaclass=MetaBase):
         self.leave_match(client['id'], server)
         self.connected_players.pop(client['id'], None)
 
-    def send_error(self, player: Player, message: str) -> None:
-        self.__logger.warning(f"Sending error message to '{player.username}' -> {message}")
-        err_msg = mtypes.ErrorMessage(message)
-        player.ws_handler.send_message(err_msg.to_json())
-
     def create_match(self, player: Player, server, json_data: dict) -> None:
 
         if player.is_playing():
             # Player is already playing so 
             # we don't allow them to create new matches
-            self.send_error(player, "You are already active in another match!");
+            player.send_error("You are already active in another match!");
             return
 
         # Create a TxSession object and assign current player
@@ -65,26 +60,26 @@ class TxSessionManager(metaclass=MetaBase):
         if player.is_playing():
             # Player is already playing so 
             # we don't allow them to join another match
-            self.send_error(player, "You are already active in another match!");
+            player.send_error("You are already active in another match!");
             return
 
         j_match: mtypes.JoinMatch = mtypes.apply_schema_conv(mtypes.JoinMatch, json_data)
         
         # Check if specified match_id exists
         if not j_match.match_id in self.tx_sessions:
-            self.send_error(player, f"There is no active match with ID: {j_match.match_id}");
+            player.send_error(f"There is no active match with ID: {j_match.match_id}");
             return
 
         tx_session = self.tx_sessions[j_match.match_id]
 
         # Check if the specified match already has 2 players playing
         if tx_session.is_active():
-            self.send_error(player, f"Two players have already joined the match");
+            player.send_error(f"Two players have already joined the match");
             return
 
         try:
-            player.set_active(tx_session.id)
             tx_session.player_joined(player, server)
+            player.set_active(tx_session.id)
         except Exception:
             self.__logger.exception(f"Cannot join the match. Message: {json_data}")
 
@@ -152,6 +147,12 @@ class TxSessionManager(metaclass=MetaBase):
                 # Client sent their first message and it didn't
                 # contain authentication token
                 self.force_disconnect_client(raw_client, server)
+                return
+
+            if player.is_token_expired():
+                player.send_error("Token expired")
+                self.force_disconnect_client(raw_client, server)
+                return
 
             # ==========================================================
 
@@ -167,7 +168,6 @@ class TxSessionManager(metaclass=MetaBase):
                     tx_session.handle_game_message(player, server, msg_type, json_data)
                 else:
                     self.__logger.warning(f"Unrecognized message from {player.username}: {json_data}")
-
 
         except Exception as ex:
 

@@ -1,7 +1,9 @@
 from websocket_server import WebSocketHandler
 import time
+from src.metabase import MetaBase
+import src.game.protocol.msg_types as mtypes
 
-class Player:
+class Player(metaclass=MetaBase):
 
     @property
     def client_id(self) -> int:
@@ -37,3 +39,11 @@ class Player:
 
     def is_token_expired(self) -> bool:
         return int(time.time()) > self.token_expiration
+
+    def send_message(self, message) -> None:
+        self.ws_handler.send_message(message)
+
+    def send_error(self, message) -> None:
+        self.__logger.warning(f"Sending error message to '{self.username}' -> {message}")
+        err_msg = mtypes.ErrorMessage(message)
+        self.ws_handler.send_message(err_msg.to_json())
