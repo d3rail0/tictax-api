@@ -1,3 +1,4 @@
+from typing import Set
 import jwt
 import json
 import settings
@@ -27,6 +28,7 @@ class TxSessionManager(metaclass=MetaBase):
 
         # client_id --> player object
         self.connected_players: dict[int, Player] = {} 
+        self.connected_usernames: set = set()
 
         # Symmetric key used to verify signatures for JWT token
         self.sym_key = settings.TICTAX_JWT_KEY
@@ -37,7 +39,9 @@ class TxSessionManager(metaclass=MetaBase):
 
     def on_client_disconnected(self, client: dict, server) -> None:
         self.leave_match(client['id'], server)
-        self.connected_players.pop(client['id'], None)
+        if client['id'] in self.connected_players:
+            self.connected_usernames.discard(self.connected_players.get('id').username)
+            self.connected_players.pop(client['id'])
 
     def create_match(self, player: Player, server, json_data: dict) -> None:
 
@@ -153,9 +157,16 @@ class TxSessionManager(metaclass=MetaBase):
                         json_decoded['exp']
                     )
 
-                    self.connected_players[player.client_id] = player
-                    self.__logger.info(f"{player.username} was successfully authenticated!")
-                    return
+                    if player.username in self.connected_usernames:
+                        # The same player already has an open websocket
+                        # connection. Setting player = None will cause
+                        # forced disconnect only for this session.
+                        player = None
+                    else:
+                        self.connected_usernames.add(player.username)
+                        self.connected_players[player.client_id] = player
+                        self.__logger.info(f"{player.username} was successfully authenticated!")
+                        return
 
                 except Exception:
                     self.__logger.exception(f"[TxSessionManager] -> Authentication failed!")
