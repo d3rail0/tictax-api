@@ -16,8 +16,8 @@
 
     <script src='/lib/bootstrap/js/bootstrap.bundle.min.js'></script>
     <script src='/lib/jquery/js/jquery.min.js'></script>
-    <script src='/js/auth.js'></script>
 
+    <script src='/js/lobby.js'></script>
 </head>
 
 <body>
@@ -40,11 +40,11 @@
                 </p>
 
                 <div class="vstack gap-3 mx-auto mt-3">
-                    <button type="button" class="btn btn-lg btn-success">Create a room</button>
+                    <button id="cmdCreateRoom" type="button" class="btn btn-lg btn-success">Create a room</button>
                 </div>
 
                 <div class="vstack gap-3 mx-auto mt-2">
-                    <button type="button" class="btn btn-warning">Refresh rooms</button>
+                    <button id="cmdRefresh" type="button" class="btn btn-warning">Refresh rooms</button>
                 </div>
 
             </div>
@@ -62,14 +62,7 @@
                             <th scope="col" class="col-2">[Press]</th>
                         </thead>
                         <tbody id="roomTable" class="text-white text-center align-middle">
-                            <tr id="room_ID">
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>
-                                    <button type="button" class="btn btn-warning" callback="">Join</button>
-                                </td>
-                            </tr>
-
+                            <!-- Dynamically inserted rows -->
                         </tbody>
                     </table>
                 </div>
@@ -77,6 +70,9 @@
         </div>
     </div>
 
+    <div id="includedContent">
+
+    </div>
 
 </body>
 

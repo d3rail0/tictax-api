@@ -35,7 +35,7 @@ const initSocket = (address) => {
 
     // Connection opened
     socket.addEventListener('open', function(event) {
-        socket.send('Hello Server!');
+        socket.send('{"type": "auth", "token": ""}');
     });
 
     // Listen for messages
