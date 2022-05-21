@@ -65,8 +65,7 @@ class TxSession(metaclass=MetaBase):
             raise Exception(f"Match {self.id} was already active when player {new_player.username} tried to join.")
 
         if new_player.username == self.owner.username:
-            new_player.send_error("Cannot play against yourself!")
-            raise Exception(f"{new_player.username} tried to play against themself")
+            raise Exception(f"You can't play against yourself")
 
         self.__logger.info(f"{new_player.username} joined {self.owner.username}'s match")
 

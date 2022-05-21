@@ -5,6 +5,9 @@ from src.metabase import *
 from src.game.tx_session import *
 from src.game.player import Player
 import src.game.protocol.msg_types as mtypes
+from src.game.db_manager import DBManager
+
+import threading
 
 class TxSessionManager(metaclass=MetaBase):
     """ TxSessionManager will be creating game session when
@@ -13,10 +16,12 @@ class TxSessionManager(metaclass=MetaBase):
     and destroy session messages.  
     """
 
+    sessions_lock = threading.Lock()
+
     def __init__(self) -> None:
         self.__logger: Log
 
-        self.session_id = 1;
+        self.db_manager = DBManager()
 
         self.tx_sessions: dict[int, TxSession] = {}
 
@@ -42,18 +47,17 @@ class TxSessionManager(metaclass=MetaBase):
             player.send_error("You are already active in another match!");
             return
 
-        # Create a TxSession object and assign current player
-        player.active_tx_session_id = self.session_id
+        print(f"{player.username} is playing => {player.is_playing()}")
 
-        new_tx_session = TxSession(player)
-        self.tx_sessions[new_tx_session.id] = new_tx_session
+        with self.sessions_lock:
+            # Create a TxSession object and assign current player
+            session_id = self.db_manager.create_match_ret_id(player)
+            player.set_active(session_id)
+
+            new_tx_session = TxSession(player)
+            self.tx_sessions[new_tx_session.id] = new_tx_session
 
         self.__logger.info(f"New match with id {new_tx_session.id} has been created by {player.username}")
-
-        # TODO: Update backend about newly created match so that
-        # it can be pushed into the server browser
-
-        self.session_id += 1
     
     def join_match(self, player: Player, server, json_data: dict) -> None:
         
@@ -65,23 +69,27 @@ class TxSessionManager(metaclass=MetaBase):
 
         j_match: mtypes.JoinMatch = mtypes.apply_schema_conv(mtypes.JoinMatch, json_data)
         
-        # Check if specified match_id exists
-        if not j_match.match_id in self.tx_sessions:
-            player.send_error(f"There is no active match with ID: {j_match.match_id}");
-            return
+        with self.sessions_lock:
+            # Check if specified match_id exists
+            if not j_match.match_id in self.tx_sessions:
+                player.send_error(f"There is no active match with ID: {j_match.match_id}");
+                return
 
-        tx_session = self.tx_sessions[j_match.match_id]
+            tx_session = self.tx_sessions[j_match.match_id]
 
-        # Check if the specified match already has 2 players playing
-        if tx_session.is_active():
-            player.send_error(f"Two players have already joined the match");
-            return
+            # Check if the specified match already has 2 players playing
+            if tx_session.is_active():
+                player.send_error(f"Two players have already joined the match");
+                return
 
-        try:
-            tx_session.player_joined(player, server)
-            player.set_active(tx_session.id)
-        except Exception:
-            self.__logger.exception(f"Cannot join the match. Message: {json_data}")
+            try:            
+                tx_session.player_joined(player, server)
+                self.db_manager.opponent_join(tx_session.id, player)
+
+                player.set_active(tx_session.id)
+            except Exception as ex:
+                player.send_error(str(ex))
+                self.__logger.exception(f"Cannot join the match. Message: {json_data}")
 
     def leave_match(self, client_id, server) -> None:
         # Check this client's opponent and notify them about 
@@ -91,13 +99,22 @@ class TxSessionManager(metaclass=MetaBase):
 
             if player is not None and player.is_playing():
 
-                tx_session = self.tx_sessions.get(player.active_tx_session_id)
+                self.__logger.info(f"{player.username} left match {player.active_tx_session_id}")
+                
+                with self.sessions_lock:
+                    tx_session = self.tx_sessions.get(player.active_tx_session_id)
+
                 player.set_inactive()
 
                 if tx_session.owner.client_id == player.client_id:
                     # Owner has left the match
+
                     tx_id = tx_session.id
-                    self.tx_sessions.pop(tx_id, None)
+                    
+                    with self.sessions_lock:
+                        self.tx_sessions.pop(tx_id, None)
+                        self.db_manager.remove_match(tx_id)
+
                     if tx_session.is_active():
                         self.__logger.info(f"{player.username} has closed their match")
                         disconn_msg = mtypes.PlayerDisonnected(tx_id, True)
@@ -115,6 +132,8 @@ class TxSessionManager(metaclass=MetaBase):
         # Authenticate --> should only contain jwt token
         # Every other message shall contain session_id and should be related to game logic
 
+        player: Player = self.connected_players.get(raw_client['id'], None) 
+
         try:
             # Authentication
             # ==========================================================
@@ -122,8 +141,6 @@ class TxSessionManager(metaclass=MetaBase):
             # Convert message to a JSON object
             json_data = json.loads(message)
             msg_type = json_data['type']
-
-            player: Player = self.connected_players.get(raw_client['id'], None) 
 
             if msg_type == mtypes.AUTH:
 
@@ -163,7 +180,9 @@ class TxSessionManager(metaclass=MetaBase):
             elif msg_type == mtypes.LEAVE_MATCH:
                 self.leave_match(player.client_id, server)
             else:
-                tx_session = self.tx_sessions.get(player.active_tx_session_id, None)
+                with self.sessions_lock:
+                    tx_session = self.tx_sessions.get(player.active_tx_session_id, None)
+                
                 if tx_session is not None:
                     tx_session.handle_game_message(player, server, msg_type, json_data)
                 else:
@@ -174,6 +193,12 @@ class TxSessionManager(metaclass=MetaBase):
             # Check if the player was authenticated
             if not raw_client['id'] in self.connected_players:
                 server.disconnect_client(raw_client)
+            elif player is not None:
+                # Send error message back to client
+                try:
+                    player.send_error(str(ex))
+                except:
+                    pass
 
             self.__logger.exception(f"[TxSessionManager] -> Error in handle_message() | ClientId {raw_client['id']} received message: " + message)
 
