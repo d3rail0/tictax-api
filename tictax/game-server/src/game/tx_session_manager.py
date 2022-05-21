@@ -125,6 +125,9 @@ class TxSessionManager(metaclass=MetaBase):
                         tx_session.player2.ws_handler.send_message(disconn_msg.to_json())
                 else:
                     # Opponent of the owner left the match
+                    with self.sessions_lock:
+                        self.db_manager.opponent_disconnected(tx_session.id)
+
                     tx_session.handle_opponent_disconnect(server)
                 
         except Exception as ex:

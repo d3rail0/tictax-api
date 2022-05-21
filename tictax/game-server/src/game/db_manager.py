@@ -50,3 +50,11 @@ class DBManager():
             "DELETE FROM Match WHERE Id=?",
             match_id
         )
+
+    def opponent_disconnected(self, match_id: int) -> None:
+        """ Untags opponent username from match record        
+        """
+        self.__execute_and_commit_params(
+            "UPDATE Match SET OpponentUsername=NULL WHERE Id=?",
+            match_id
+        )
