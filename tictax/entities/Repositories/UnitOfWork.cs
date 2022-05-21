@@ -14,6 +14,7 @@ namespace entities.Repositories
         private readonly AppDbContext _appDbContext;
 
         public IUserRepository Users { get; private set; }
+        public IMatchRepository Matches { get; private set; }
 
         public UnitOfWork(
                 AppDbContext appDbContext,
@@ -23,6 +24,7 @@ namespace entities.Repositories
             _appDbContext = appDbContext;
 
             Users = new UserRepository(_appDbContext);
+            Matches = new MatchRepository(_appDbContext);
 
         }
 

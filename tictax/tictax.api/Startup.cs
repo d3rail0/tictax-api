@@ -160,6 +160,12 @@ namespace tictax.api
             {
                 endpoints.MapControllers();
             });
+
+            // Since all active matches will be killed after server restarts
+            // we will also remove all data from table Match to avoid having "zombie" matches
+            var dbCtx = app.ApplicationServices.GetService<AppDbContext>();
+            dbCtx.Database.ExecuteSqlRaw("TRUNCATE TABLE [Match]");
+
         }
     }
 }
