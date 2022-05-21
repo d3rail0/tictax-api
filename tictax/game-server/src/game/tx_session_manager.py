@@ -1,5 +1,4 @@
 import jwt
-import os
 import json
 import settings
 from src.metabase import *
@@ -27,16 +26,33 @@ class TxSessionManager(metaclass=MetaBase):
         # Symmetric key used to verify signatures for JWT token
         self.sym_key = settings.TICTAX_JWT_KEY
 
-    def is_token_expired(self, client_username: str) -> bool:
-        pass
-
     def force_disconnect_client(self, client: dict, server):
         self.__logger.warning(f"[TxSessionmanager] -> Force disconnected client {client['id']}")
         server.disconnect_client(client)
 
     def on_client_disconnected(self, client: dict, server) -> None:
         # Check this client's opponent and notify them about 
-        # the leave
+        # the leave.
+        try:
+            player = self.connected_players.get(client['id'])
+
+            if player.is_playing():
+                tx_session = self.tx_sessions.get(player.active_tx_session_id)
+
+                if tx_session.owner.client_id == player.client_id:
+                    # Owner has left the match
+                    tx_id = tx_session.id
+                    self.tx_sessions.pop(tx_id, None)
+                    if tx_session.is_active():
+                        disconn_msg = mtypes.PlayerDisonnected(tx_id, True)
+                        tx_session.player2.ws_handler.send_message(disconn_msg.to_json())
+                else:
+                    # Opponent of the owner left the match
+                    tx_session.handle_opponent_disconnect(server)
+                
+        except Exception as ex:
+            self.__logger.error(f"Error occured when player: {client['id']} left")
+
         self.connected_players.pop(client['id'], None)
 
     def send_error(self, player: Player, message: str) -> None:
@@ -48,22 +64,50 @@ class TxSessionManager(metaclass=MetaBase):
 
         if player.is_playing():
             # Player is already playing so 
-            # we don't allow him to create new matches
+            # we don't allow them to create new matches
             self.send_error(player, "You are already active in another match!");
             return
 
         # Create a TxSession object and assign current player
         player.active_tx_session_id = self.session_id
 
+        new_tx_session = TxSession(player)
+        self.tx_sessions[new_tx_session.id] = new_tx_session
+
+        # TODO: Update backend about newly created match so that
+        # it can be pushed into the server browser
 
         self.session_id += 1
     
     def join_match(self, player: Player, server, json_data: dict) -> None:
-        pass
-    
+        
+        if player.is_playing():
+            # Player is already playing so 
+            # we don't allow them to join another match
+            self.send_error(player, "You are already active in another match!");
+            return
+
+        j_match: mtypes.JoinMatch = mtypes.apply_schema_conv(mtypes.JoinMatch, json_data)
+        
+        # Check if specified match_id exists
+        if not j_match.match_id in self.tx_sessions:
+            self.send_error(player, f"There is no active match with ID: {j_match.match_id}");
+            return
+
+        tx_session = self.tx_sessions[j_match.match_id]
+
+        # Check if the specified match already has 2 players playing
+        if tx_session.is_active():
+            self.send_error(player, f"Two players have already joined the match");
+            return
+
+        try:
+            tx_session.player_joined(player, server)
+        except Exception:
+            self.__logger.error(f"Cannot join the match. Message: {json_data}")
+
     def leave_match(self, player: Player, server, json_data: dict) -> None:
         pass
-
 
     def handle_message(self, raw_client: dict, server, message: str) -> None:
         # Create match --> creates new session

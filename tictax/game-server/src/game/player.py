@@ -1,4 +1,5 @@
 from websocket_server import WebSocketHandler
+import time
 
 class Player:
 
@@ -18,7 +19,11 @@ class Player:
         self.client_raw = client_raw
         self.username = username
         self.token_expiration = token_expiration
+        
         self.active_tx_session_id = active_tx_session_id
 
-    def is_playing(self):
+    def is_playing(self) -> bool:
         return self.active_tx_session_id > 0
+
+    def is_token_expired(self) -> bool:
+        return int(time.time()) > self.token_expiration
