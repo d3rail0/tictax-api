@@ -10,5 +10,8 @@ namespace entities.Repositories.Interfaces
     public interface IMatchRepository : IGenericRepository<Match>
     {
 
+        public Task<IEnumerable<Match>> GetAvailableMatches();
+        public int GetTotalMatchCount();
+
     }
 }

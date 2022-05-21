@@ -17,5 +17,14 @@ namespace entities.Repositories
 
         }
 
+        public async Task<IEnumerable<Match>> GetAvailableMatches()
+        {
+            return await Find(m => m.OpponentUsername == null);
+        }
+
+        public int GetTotalMatchCount()
+        {
+            return  _dbSet.Count();
+        }
     }
 }

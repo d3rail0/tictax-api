@@ -59,10 +59,12 @@ namespace tictax.api
             // Register repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IMatchRepository, MatchRepository>();
 
             // Register services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IMatchService, MatchService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -161,10 +163,14 @@ namespace tictax.api
                 endpoints.MapControllers();
             });
 
-            // Since all active matches will be killed after server restarts
-            // we will also remove all data from table Match to avoid having "zombie" matches
-            var dbCtx = app.ApplicationServices.GetService<AppDbContext>();
-            dbCtx.Database.ExecuteSqlRaw("TRUNCATE TABLE [Match]");
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                // Since all active matches will be killed after server restarts
+                // we will also remove all data from table Match to avoid having "zombie" matches
+                var dbCtx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbCtx.Database.ExecuteSqlRaw("TRUNCATE TABLE [Match]");
+            }
 
         }
     }

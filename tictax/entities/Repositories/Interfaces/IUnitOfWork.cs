@@ -10,6 +10,8 @@ namespace entities.Repositories.Interfaces
     {
         public IUserRepository Users { get; }
 
+        public IMatchRepository Matches { get; }
+
         Task CompleteAsync();
     }
 }
