@@ -65,6 +65,6 @@ class PlayerDisonnected(JsonSchemaMixin):
 
     def __init__(self, match_id: int, goto_lobby:bool) -> None:
         super().__init__()
-        self.type = OPONNENT_DISCONNECTED
+        self.type = PLAYER_DISCONNECTED
         self.match_id = match_id
         self.goto_lobby = goto_lobby

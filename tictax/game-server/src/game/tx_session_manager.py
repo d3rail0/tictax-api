@@ -31,28 +31,7 @@ class TxSessionManager(metaclass=MetaBase):
         server.disconnect_client(client)
 
     def on_client_disconnected(self, client: dict, server) -> None:
-        # Check this client's opponent and notify them about 
-        # the leave.
-        try:
-            player = self.connected_players.get(client['id'])
-
-            if player.is_playing():
-                tx_session = self.tx_sessions.get(player.active_tx_session_id)
-
-                if tx_session.owner.client_id == player.client_id:
-                    # Owner has left the match
-                    tx_id = tx_session.id
-                    self.tx_sessions.pop(tx_id, None)
-                    if tx_session.is_active():
-                        disconn_msg = mtypes.PlayerDisonnected(tx_id, True)
-                        tx_session.player2.ws_handler.send_message(disconn_msg.to_json())
-                else:
-                    # Opponent of the owner left the match
-                    tx_session.handle_opponent_disconnect(server)
-                
-        except Exception as ex:
-            self.__logger.error(f"Error occured when player: {client['id']} left")
-
+        self.leave_match(client['id'], server)
         self.connected_players.pop(client['id'], None)
 
     def send_error(self, player: Player, message: str) -> None:
@@ -73,6 +52,8 @@ class TxSessionManager(metaclass=MetaBase):
 
         new_tx_session = TxSession(player)
         self.tx_sessions[new_tx_session.id] = new_tx_session
+
+        self.__logger.info(f"New match with id {new_tx_session.id} has been created by {player.username}")
 
         # TODO: Update backend about newly created match so that
         # it can be pushed into the server browser
@@ -102,12 +83,36 @@ class TxSessionManager(metaclass=MetaBase):
             return
 
         try:
+            player.set_active(tx_session.id)
             tx_session.player_joined(player, server)
         except Exception:
-            self.__logger.error(f"Cannot join the match. Message: {json_data}")
+            self.__logger.exception(f"Cannot join the match. Message: {json_data}")
 
-    def leave_match(self, player: Player, server, json_data: dict) -> None:
-        pass
+    def leave_match(self, client_id, server) -> None:
+        # Check this client's opponent and notify them about 
+        # the leave.
+        try:
+            player = self.connected_players.get(client_id, None)
+
+            if player is not None and player.is_playing():
+
+                tx_session = self.tx_sessions.get(player.active_tx_session_id)
+                player.set_inactive()
+
+                if tx_session.owner.client_id == player.client_id:
+                    # Owner has left the match
+                    tx_id = tx_session.id
+                    self.tx_sessions.pop(tx_id, None)
+                    if tx_session.is_active():
+                        self.__logger.info(f"{player.username} has closed their match")
+                        disconn_msg = mtypes.PlayerDisonnected(tx_id, True)
+                        tx_session.player2.ws_handler.send_message(disconn_msg.to_json())
+                else:
+                    # Opponent of the owner left the match
+                    tx_session.handle_opponent_disconnect(server)
+                
+        except Exception as ex:
+            self.__logger.exception(f"Error occured when player: {client_id} left")
 
     def handle_message(self, raw_client: dict, server, message: str) -> None:
         # Create match --> creates new session
@@ -155,10 +160,13 @@ class TxSessionManager(metaclass=MetaBase):
             elif msg_type == mtypes.JOIN_MATCH:
                 self.join_match(player, server, json_data)
             elif msg_type == mtypes.LEAVE_MATCH:
-                self.leave_match(player, server, json_data)
+                self.leave_match(player.client_id, server)
             else:
-                # Pass the message to an actual session
-                pass
+                tx_session = self.tx_sessions.get(player.active_tx_session_id, None)
+                if tx_session is not None:
+                    tx_session.handle_game_message(player, server, msg_type, json_data)
+                else:
+                    self.__logger.warning(f"Unrecognized message from {player.username}: {json_data}")
 
 
         except Exception as ex:

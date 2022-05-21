@@ -18,7 +18,7 @@ class TxSession(metaclass=MetaBase):
 
     @property
     def owner(self) -> Player:
-        return self.__player1
+        return self.player1
 
     def __init__(self, owner: Player) -> None:
         self.__logger: Log        
@@ -43,6 +43,8 @@ class TxSession(metaclass=MetaBase):
         return self.player2 is not None and self.player1 is not None
     
     def handle_opponent_disconnect(self, server) -> None:
+        self.__logger.info(f"{self.player2.username} left {self.owner.username}'s match")
+
         disconn_msg = mtypes.PlayerDisonnected(self.id, False)
         self.player2 = None
         self.owner.ws_handler.send_message(disconn_msg.to_json())        
@@ -50,6 +52,8 @@ class TxSession(metaclass=MetaBase):
     def player_joined(self, new_player: Player, server) -> None:
         if self.player2 is not None:
             raise Exception(f"Match {self.id} was already active when player {new_player.username} tried to join.")
+
+        self.__logger.info(f"{new_player.username} joined {self.owner.username}'s match")
 
         self.player2 = new_player
         self.start_game()
@@ -60,8 +64,9 @@ class TxSession(metaclass=MetaBase):
         self.player2.ws_handler.send_message(g_state)
 
     def start_game(self) -> None:
+        self.__logger.info(f"Game at match {self.id} was started")
         self.game.reset_board()
         self.send_state_to_players()
 
-    def handle_game_message(self) -> None:
+    def handle_game_message(self, player: Player, server, msg_type, json_data: dict) -> None:
         pass

@@ -20,10 +20,20 @@ class Player:
         self.username = username
         self.token_expiration = token_expiration
         
-        self.active_tx_session_id = active_tx_session_id
+        self.set_active(active_tx_session_id)
 
     def is_playing(self) -> bool:
         return self.active_tx_session_id > 0
+
+    def set_inactive(self) -> None:
+        """ Sets player to inactive state, meaning
+        is_playing() will be returning false onwards until
+        player joins another session. 
+        """
+        self.active_tx_session_id = 0
+
+    def set_active(self, tx_session_id) -> None:
+        self.active_tx_session_id = tx_session_id
 
     def is_token_expired(self) -> bool:
         return int(time.time()) > self.token_expiration
