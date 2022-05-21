@@ -94,12 +94,16 @@ class TxSession(metaclass=MetaBase):
         pass
 
     def start_game(self) -> None:
-        self.__logger.info(f"Game at match {self.id} was started")
+        self.__logger.info(f"Starting game at {self.id}...")
         self.game.reset_board()    
         self.send_state_to_players()
+        self.__logger.info(f"Game at match {self.id} was started")
 
     def handle_game_message(self, player: Player, server, msg_type, json_data: dict) -> None:
         
+        if not self.is_active():
+            raise Exception('Game hasn\'t started yet')
+
         if msg_type != mtypes.PLAY_MOVE:
             raise Exception('Unrecognized game message')
         

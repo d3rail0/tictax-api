@@ -28,7 +28,7 @@ class Auth(JsonSchemaMixin):
 @dataclass
 class JoinMatch(JsonSchemaMixin):
     type: str
-    match_id: int
+    matchId: int
 
 @dataclass
 class ErrorMessage(JsonSchemaMixin):
@@ -43,47 +43,47 @@ class ErrorMessage(JsonSchemaMixin):
 @dataclass
 class GameState(JsonSchemaMixin):
     type: str
-    match_id: int
+    matchId: int
     board: list[list[str]]
-    valid_moves: list[int]
+    validMoves: list[int]
     opponent: str
 
     def __init__(self, tx_game, opponent="") -> None:
         super().__init__()
 
         self.type = GAME_STATE
-        self.match_id = tx_game.match_id
+        self.matchId = tx_game.match_id
         self.board = tx_game.board
-        self.valid_moves = list(tx_game.available_moves())
+        self.validMoves = list(tx_game.available_moves())
         self.opponent = opponent
 
 @dataclass
 class PlayerDisonnected(JsonSchemaMixin):
     type: str
-    match_id: int
+    matchId: int
     # goto lobby is false when this message
     # is sent to an owner of a session because
     # their opponent had left the match
-    goto_lobby: bool
+    gotoLobby: bool
 
     def __init__(self, match_id: int, goto_lobby:bool) -> None:
         super().__init__()
         self.type = PLAYER_DISCONNECTED
-        self.match_id = match_id
-        self.goto_lobby = goto_lobby
+        self.matchId = match_id
+        self.gotoLobby = goto_lobby
 
 @dataclass
 class PlayMove(JsonSchemaMixin):
     type: str
-    match_id: int
+    matchId: int
     cell: int
 
 @dataclass
 class GameEnd(JsonSchemaMixin):
     type: str
-    match_id: int
+    matchId: int
     winner: str
-    is_tie: bool
+    isTie: bool
 
     # username -> win count
     score: dict[str, int]
@@ -91,7 +91,7 @@ class GameEnd(JsonSchemaMixin):
     def __init__(self, match_id, winner, is_tie, score: dict[str, int]) -> None:
         super().__init__()
         self.type = GAME_END
-        self.match_id = match_id
+        self.matchId = match_id
         self.winner = winner
-        self.is_tie = is_tie
+        self.isTie = is_tie
         self.score = score

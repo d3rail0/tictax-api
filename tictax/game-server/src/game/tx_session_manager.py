@@ -40,7 +40,7 @@ class TxSessionManager(metaclass=MetaBase):
     def on_client_disconnected(self, client: dict, server) -> None:
         self.leave_match(client['id'], server)
         if client['id'] in self.connected_players:
-            self.connected_usernames.discard(self.connected_players.get('id').username)
+            self.connected_usernames.discard(self.connected_players.get(client['id']).username)
             self.connected_players.pop(client['id'])
 
     def create_match(self, player: Player, server, json_data: dict) -> None:
@@ -75,11 +75,11 @@ class TxSessionManager(metaclass=MetaBase):
         
         with self.sessions_lock:
             # Check if specified match_id exists
-            if not j_match.match_id in self.tx_sessions:
-                player.send_error(f"There is no active match with ID: {j_match.match_id}");
+            if not j_match.matchId in self.tx_sessions:
+                player.send_error(f"There is no active match with ID: {j_match.matchId}");
                 return
 
-            tx_session = self.tx_sessions[j_match.match_id]
+            tx_session = self.tx_sessions[j_match.matchId]
 
             # Check if the specified match already has 2 players playing
             if tx_session.is_active():

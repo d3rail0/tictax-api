@@ -26,7 +26,7 @@ class DBManager():
             (int(time.time()), owner.username)
             )
 
-        record_id = cursor.execute('SELECT @@IDENTITY AS id;').fetchone()[0]
+        record_id = int(cursor.execute('SELECT @@IDENTITY AS id;').fetchone()[0])
         cursor.commit()
 
         return record_id
