@@ -63,17 +63,68 @@ $(document).ready(function() {
             return
         }
 
+        const initGameData = (matchId, isOwner) => {
+            // Initializes required local storage items to prepare
+            // client for connection with the game server.
+            // Returns true if successful at doing so.
+            localStorage.setItem('tictax_is_owner', isOwner);
+
+            // Get WS Host
+            const body = {
+                MatchId: matchId
+            };
+
+            let isError = false;
+
+            fetch('/api/matches', {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Authorization': 'bearer ' + stored_token
+                    }
+                })
+                .then(resp => {
+                    if (!resp.ok) {
+                        throw 'Couldn\'t fetch websocket server host';
+                    }
+                    return resp.json();
+                })
+                .then(data => {
+                    console.log("server host:", data.wsServerHost);
+                    localStorage.setItem('tictax_game_server', data.wsServerHost);
+                    localStorage.setItem('tictax_match_id', data.matchId);
+                })
+                .catch(err => {
+                    isError = true;
+                    console.log(err);
+                    showError(err);
+                });
+
+            return !isError;
+        }
+
+        $('#cmdLogout').click(function() {
+            localStorage.setItem('tictax_jwt_token', null);
+            window.location.href = './index.html';
+        });
+
         $("#roomTable").on('click', 'button[class*=\'join-btn\']', function() {
             elem = $(this);
-            match_id = elem.attr('data')
-            console.log("join ->", match_id);
+            matchId = parseInt(elem.attr('data'));
+            console.log("join ->", matchId);
+
+            if (initGameData(matchId, false)) {
+                // Redirect to game.html
+                window.location.href = './game.html';
+            }
         })
 
         $('#cmdRefresh').click(function() {
 
             $("#roomTable").empty();
 
-            fetch('api/matches', {
+            fetch('/api/matches', {
                     method: 'GET',
                     headers: {
                         'Authorization': 'bearer ' + stored_token
@@ -86,6 +137,7 @@ $(document).ready(function() {
                     return resp.json();
                 })
                 .then(data => {
+                    // Display available matches within the server browser table
                     $('#totalRoomsText').text(`Total rooms: ${data.totalMatches}`);
                     $('#activeRoomsText').text(`Available rooms: ${data.availableMatches.length}`);
                     const serverBrowser = $('#roomTable');
@@ -119,8 +171,15 @@ $(document).ready(function() {
                 })
         });
 
+        $('#cmdCreateRoom').click(function() {
+            if (initGameData(0, true)) {
+                // Redirect to game.html
+                window.location.href = './game.html';
+            }
+        });
 
-        // Refresh automatically when the page is opened
+
+        // Refresh server list automatically when the page is loaded
         $('#cmdRefresh').click();
 
     });

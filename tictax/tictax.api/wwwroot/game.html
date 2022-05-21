@@ -26,7 +26,13 @@
 
                 <div class="col-sm-2 d-flex justify-content-sm-end justify-content-center">
                     <p id="player1" class="lead my-auto">
-                        <strong>Player1</strong>
+                        Player1
+                    </p>
+                    <p class="lead my-auto">
+                        <strong>&nbsp;&nbsp;</strong>
+                        <p id="player1Score" class="lead my-auto">
+                            <strong>0</strong>
+                        </p>
                     </p>
                 </div>
 
@@ -37,14 +43,20 @@
                 </div>
 
                 <div class="col-sm-2 d-flex justify-content-sm-start justify-content-center">
+                    <p class="lead my-auto">
+                        <p id="player2Score" class="lead my-auto">
+                            <strong>0</strong>
+                        </p>
+                        <strong>&nbsp;&nbsp;</strong>
+                    </p>
                     <p id="player2" class="lead my-auto">
-                        <strong>Player2</strong>
+                        Player2
                     </p>
                 </div>
             </div>
 
             <div class="position-absolute top-0 end-0" style="margin-top: 7px; margin-right: 7px;">
-                <button type="button" class="btn btn-lg no-focus btn-danger my-auto" callback="">Leave</button>
+                <button id="cmdDisconnect" type="button" class="btn btn-lg no-focus btn-danger my-auto" callback="">Leave</button>
             </div>
 
         </div>
@@ -52,21 +64,25 @@
         <div class="row flex-fill">
             <main class="col-sm-12 p-0 mainContent d-flex justify-content-center align-items-center">
 
-                <div class="board">
-                    <button class="square" onclick="handleClick(this, 0)"></button>
-                    <button class="square" onclick="handleClick(this, 1)"></button>
-                    <button class="square" onclick="handleClick(this, 2)"></button>
-                    <button class="square" onclick="handleClick(this, 3)"></button>
-                    <button class="square" onclick="handleClick(this, 4)"></button>
-                    <button class="square" onclick="handleClick(this, 5)"></button>
-                    <button class="square" onclick="handleClick(this, 6)"></button>
-                    <button class="square" onclick="handleClick(this, 7)"></button>
-                    <button class="square" onclick="handleClick(this, 8)"></button>
+                <div class="board" id="gameBoard">
+                    <button class="square" cell="1"></button>
+                    <button class="square" cell="2"></button>
+                    <button class="square" cell="3"></button>
+                    <button class="square" cell="4"></button>
+                    <button class="square" cell="5"></button>
+                    <button class="square" cell="6"></button>
+                    <button class="square" cell="7"></button>
+                    <button class="square" cell="8"></button>
+                    <button class="square" cell="9"></button>
                 </div>
 
 
             </main>
         </div>
+
+    </div>
+
+    <div id="includedContent">
 
     </div>
 
