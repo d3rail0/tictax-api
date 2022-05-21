@@ -9,5 +9,7 @@ namespace tictax.api.Services.Interfaces
         public Task<IEnumerable<Match>> GetAvailableMatches();
 
         public int GetTotalMatchCount();
+
+        public string GetWSServerHost();
     }
 }

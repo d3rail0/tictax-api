@@ -49,5 +49,15 @@ namespace tictax.api.Controllers
             return Ok(ms_response);
         }
 
+        [HttpPost]
+        public IActionResult Post(MatchJoinRequest m_req)
+        {
+            return Ok(
+                new MatchJoinResponse { 
+                    WSServerHost = _matchService.GetWSServerHost(), 
+                    MatchId = (int)m_req?.MatchId
+                });
+        }
+
     }
 }

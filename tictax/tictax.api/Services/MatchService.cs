@@ -1,6 +1,7 @@
 ﻿using entities.Model;
 using entities.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using tictax.api.Services.Interfaces;
@@ -31,5 +32,9 @@ namespace tictax.api.Services
             return _unitOfWork.Matches.GetTotalMatchCount();
         }
 
+        public string GetWSServerHost()
+        {
+            return Environment.GetEnvironmentVariable("GAME_SERVER_RHOST");
+        }
     }
 }
