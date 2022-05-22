@@ -14,7 +14,14 @@ html {
 
 body {
     background: #dcdcdc;
+}
+
+.container {
     margin-top: 20px;
+}
+
+.not-rounded {
+    border-radius: 0;
 }
 
 .profile-cover {

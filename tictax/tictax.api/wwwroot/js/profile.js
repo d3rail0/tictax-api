@@ -172,6 +172,10 @@ $(document).ready(function() {
         window.location.href = './profile.html?' + searchParams.toString();
     });
 
+    $('#cmdBackToLobby').click(function() {
+        window.location.href = './lobby.html';
+    });
+
     if (loadedProfileUsername !== loggedInUsername) {
         // Don't show "Update status" button 
         // if player is viewing someone elses profile
