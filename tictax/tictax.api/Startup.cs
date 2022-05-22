@@ -60,11 +60,13 @@ namespace tictax.api
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
+            services.AddScoped<IProfileActivityRepository, ProfileActivityRepository>();
 
             // Register services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMatchService, MatchService>();
+            services.AddScoped<IProfileService, ProfileService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

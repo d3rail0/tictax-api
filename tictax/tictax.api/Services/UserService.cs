@@ -33,6 +33,15 @@ namespace tictax.api.Services
             return result;
         }
 
+        public bool AmIAuthenticated()
+        {
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated && !IsTokenExpired();
+            }
+            return false;
+        }
+
         public DateTime GetExpiryDate()
         {
             DateTime result = DateTime.UtcNow;

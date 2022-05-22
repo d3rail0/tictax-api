@@ -10,7 +10,7 @@ namespace tictax.api.Helpers
             return dateTimeOffset.UtcDateTime;
         }
 
-        public static double DateTimeToUnixTimestamp(DateTime dateTime)
+        public static long DateTimeToUnixTimestamp(DateTime dateTime)
         {
             DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime, TimeSpan.Zero);
             return dateTimeOffset.ToUnixTimeSeconds();

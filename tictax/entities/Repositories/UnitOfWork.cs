@@ -15,6 +15,7 @@ namespace entities.Repositories
 
         public IUserRepository Users { get; private set; }
         public IMatchRepository Matches { get; private set; }
+        public IProfileActivityRepository ProfileActivites { get; private set; }
 
         public UnitOfWork(
                 AppDbContext appDbContext,
@@ -25,6 +26,7 @@ namespace entities.Repositories
 
             Users = new UserRepository(_appDbContext);
             Matches = new MatchRepository(_appDbContext);
+            ProfileActivites = new ProfileActivityRepository(_appDbContext);
 
         }
 

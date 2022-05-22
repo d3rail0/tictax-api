@@ -12,6 +12,8 @@ namespace entities.Repositories.Interfaces
 
         public IMatchRepository Matches { get; }
 
+        public IProfileActivityRepository ProfileActivites { get; }
+
         Task CompleteAsync();
     }
 }

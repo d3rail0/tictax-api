@@ -20,6 +20,7 @@ namespace tictax.api.Services.Interfaces
         public DateTime GetExpiryDate();
 
         public bool IsTokenExpired();
+        public bool AmIAuthenticated();
 
         public Task<User> GetUserAsync(string username);
         public Task RegisterAccountAsync(User user);

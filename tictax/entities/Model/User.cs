@@ -22,11 +22,20 @@ namespace entities.Model
         public int TotalLoses { get; set; } = 0;
         public int TotalGames { get; set; } = 0;
 
+        public bool IsAvailable { get; set; }
+
         [InverseProperty(nameof(Match.Owner))]
         public ICollection<Match> OwnerMatches { get; set; }
 
         [InverseProperty(nameof(Match.Opponent))]
         public ICollection<Match> OpponentMatches { get; set; }
+
+        [InverseProperty(nameof(ProfileActivity.Initiator))]
+        public ICollection<ProfileActivity> InitiatorProfileActivites { get; set; }
+
+        [InverseProperty(nameof(ProfileActivity.Recipient))]
+        public ICollection<ProfileActivity> RecipientProfileActivites { get; set; }
+
     }
 
 }
