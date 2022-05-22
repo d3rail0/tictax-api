@@ -215,7 +215,6 @@ body {
 
 .panel-title .select2-selection .select2-selection__arrow:before {
     content: "\f107";
-    font-family: "Font Awesome\ 5 Free";
     font-weight: 700;
 }
 
@@ -509,7 +508,6 @@ ul:last-child {
     content: "\f10d";
     color: #999;
     margin-right: 12px;
-    font-family: "FontAwesome";
     font-size: 24px;
     font-weight: 900;
 }
@@ -684,7 +682,6 @@ li.list-group-item:first-child {
     content: "\f00c";
     color: #fff;
     background-color: #009378;
-    font-family: "FontAwesome";
     font-size: 11px;
     line-height: 21px;
     font-weight: 700;

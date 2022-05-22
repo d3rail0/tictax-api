@@ -138,6 +138,7 @@ namespace tictax.api.Services
             profileDataResponse.TotalWins = user.TotalWins;
             profileDataResponse.TotalLosses = user.TotalLoses;
             profileDataResponse.TotalDraws = user.TotalGames - (user.TotalWins + user.TotalLoses);
+            profileDataResponse.IsAvailable = user.IsAvailable;
 
             // Fetch activities
             var feed = await GetActivitiesForUser(username);

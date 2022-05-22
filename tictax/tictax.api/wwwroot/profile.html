@@ -25,8 +25,8 @@
         <div class="col-lg-8">
             <div class="panel profile-cover">
                 <div class="profile-cover__img">
-                    <img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="" />
-                    <h3 class="h3" id="txtPlayerName">Henry Foster</h3>
+                    <img src="/img/avatar.png" alt="" />
+                    <h3 class="h3" id="txtPlayerName"></h3>
                 </div>
                 <div class="profile-cover__action bg--img" data-overlay="0.3">
                     <button id="cmdUpdateStatus" class="btn btn-rounded btn-info">
@@ -40,9 +40,10 @@
                 </div>
                 <div class="profile-cover__info">
                     <ul class="nav">
+                        <li><strong id="txtIsAvailable" class="text-dark">No</strong>ST</li>
                         <li><strong id="txtWins">0</strong>Wins</li>
+                        <li><strong id="txtDraws">0</strong>Draws</li>
                         <li><strong id="txtLosses">0</strong>Losses</li>
-                        <li><strong id="txtTies">0</strong>Ties</li>
                     </ul>
                 </div>
             </div>
@@ -51,16 +52,8 @@
                     <h3 class="panel-title">Activity Feed</h3>
                 </div>
                 <div class="panel-content panel-activity">
-                    <ul class="panel-activity__list">
+                    <ul id="activityFeed" class="panel-activity__list">
                         <!-- Dynamically inserted likes -->
-                        <li>
-                            <i class="activity__list__icon fa fa-question-circle-o"></i>
-                            <div class="activity__list__header">
-                                <img src="/img/avatar.png" alt="" />
-                                <a href="#" class="userLink">John Doe</a> Liked this profile
-                            </div>
-                        </li>
-
                     </ul>
                 </div>
             </div>

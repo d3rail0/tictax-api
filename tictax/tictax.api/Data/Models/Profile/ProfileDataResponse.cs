@@ -9,6 +9,7 @@ namespace tictax.api.Data.Models
         public int TotalWins { get; set; }
         public int TotalLosses { get; set; }
         public int TotalDraws { get; set; }
+        public bool IsAvailable { get; set; }
         public List<ProfileActivityFeedResponse> ActivityFeed { get; set; } = new List<ProfileActivityFeedResponse>();
     }
 }
