@@ -62,8 +62,8 @@ class TxGame(metaclass=MetaBase):
 
         return True
 
-    def __check_rows(self):
-        for row in self.board:
+    def __check_rows(self, board):
+        for row in board:
             if len(set(row)) == 1:
                 return row[0]
         return ''
@@ -77,7 +77,7 @@ class TxGame(metaclass=MetaBase):
 
     def get_winner(self):
         for newBoard in [self.board, np.transpose(self.board)]:
-            result = self.__check_rows()
+            result = self.__check_rows(newBoard)
             if result:
                 return result
         return self.__check_diagonals()

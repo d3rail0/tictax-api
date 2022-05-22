@@ -3,15 +3,16 @@ from dataclasses_jsonschema import JsonSchemaMixin, FieldEncoder
 
 # Constants
 # ----------------------------------
-AUTH         = 'auth'
-CREATE_MATCH = 'create'
-JOIN_MATCH   = 'join'
-LEAVE_MATCH  = 'leave'
-ERROR        = 'error'
-GAME_STATE   = 'gs'
-GAME_END     = 'ge'
+AUTH                = 'auth'
+CREATE_MATCH        = 'create'
+JOIN_MATCH          = 'join'
+LEAVE_MATCH         = 'leave'
+ERROR               = 'error'
+GAME_STATE          = 'gs'
+GAME_END            = 'ge'
+GAME_BEGIN          = 'gb'
 PLAYER_DISCONNECTED = 'p_disconn'
-PLAY_MOVE = 'move'
+PLAY_MOVE           = 'move'
 # ----------------------------------
 
 def apply_schema_conv_multi(type:JsonSchemaMixin, results:dict) -> dict[str, type]:
@@ -95,3 +96,15 @@ class GameEnd(JsonSchemaMixin):
         self.winner = winner
         self.isTie = is_tie
         self.score = score
+
+@dataclass
+class GameBegin(JsonSchemaMixin):
+    type: str
+    matchId: int
+    opponent: str
+    isYourTurn: bool
+
+    def __init__(self, match_id) -> None:
+        super().__init__()
+        self.type = GAME_BEGIN
+        self.matchId = match_id

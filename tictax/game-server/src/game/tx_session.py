@@ -1,5 +1,6 @@
 from zoneinfo import available_timezones
 from global_logger import Log
+import time
 
 from src.metabase import MetaBase
 from src.game.tx_game import TxGame
@@ -90,12 +91,32 @@ class TxSession(metaclass=MetaBase):
         if self.player2 is not None:
             self.player2.send_message(message)
 
+    def send_game_begin_message(self) -> None:
+        rand_turn = randrange(0, 2)
+        next_turn_symbol = self.symbols[rand_turn]
+        next_move_player = self.p_symbols[next_turn_symbol]
+
+        # This will cause an exception if wrong
+        # player makes first move later on.
+        self.game.last_move_played = self.symbols[(rand_turn+1)%2]
+
+        # Send game begin message so that players
+        # can know if it's their time to make a move.
+        g_begin = mtypes.GameBegin(self.id)
+        g_begin.opponent = self.player2.username
+        g_begin.isYourTurn = next_move_player == self.player1.username
+        self.player1.send_message(g_begin.to_json())
+        g_begin.opponent = self.player1.username
+        g_begin.isYourTurn = not g_begin.isYourTurn
+        self.player2.send_message(g_begin.to_json())
+
     def send_scores_to_players(self) -> None:
         pass
 
     def start_game(self) -> None:
         self.__logger.info(f"Starting game at {self.id}...")
         self.game.reset_board()    
+        self.send_game_begin_message()
         self.send_state_to_players()
         self.__logger.info(f"Game at match {self.id} was started")
 
@@ -138,6 +159,8 @@ class TxSession(metaclass=MetaBase):
             )
             
             self.send_message_to_all(game_end_msg.to_json())
+            time.sleep(3);
+            self.start_game()
 
         elif len(self.game.available_moves()) == 0:
             # No more moves, it's a TIE!
@@ -149,5 +172,6 @@ class TxSession(metaclass=MetaBase):
             )
 
             self.send_message_to_all(game_end_msg.to_json())
-
+            time.sleep(3);
+            self.start_game()
 

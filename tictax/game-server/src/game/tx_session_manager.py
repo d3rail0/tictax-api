@@ -104,25 +104,30 @@ class TxSessionManager(metaclass=MetaBase):
             if player is not None and player.is_playing():
 
                 self.__logger.info(f"{player.username} left match {player.active_tx_session_id}")
-                
+
                 with self.sessions_lock:
                     tx_session = self.tx_sessions.get(player.active_tx_session_id)
 
                 player.set_inactive()
+                
+                if tx_session is None:
+                    # Session is already destroyed
+                    # because the owner has left their match
+                    return
 
                 if tx_session.owner.client_id == player.client_id:
                     # Owner has left the match
 
                     tx_id = tx_session.id
                     
-                    with self.sessions_lock:
-                        self.tx_sessions.pop(tx_id, None)
-                        self.db_manager.remove_match(tx_id)
-
                     if tx_session.is_active():
                         self.__logger.info(f"{player.username} has closed their match")
                         disconn_msg = mtypes.PlayerDisonnected(tx_id, True)
                         tx_session.player2.ws_handler.send_message(disconn_msg.to_json())
+
+                    with self.sessions_lock:
+                        self.tx_sessions.pop(tx_id, None)
+                        self.db_manager.remove_match(tx_id)
                 else:
                     # Opponent of the owner left the match
                     with self.sessions_lock:
