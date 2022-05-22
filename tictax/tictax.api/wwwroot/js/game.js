@@ -10,6 +10,7 @@ $(document).ready(function() {
             ERROR: 'error',
             GAME_STATE: 'gs',
             GAME_END: 'ge',
+            GAME_BEGIN: 'gb',
             PLAYER_DISCONNECTED: 'p_disconn',
             PLAY_MOVE: 'move'
         }
@@ -42,8 +43,15 @@ $(document).ready(function() {
             showToast("Success", msg);
         }
 
-        const back_to_lobby = () => {
+        const backToLobby = () => {
             window.location.href = './lobby.html'
+        }
+
+        function resetBoard() {
+            squareElements.forEach(square => {
+                square.textContent = "";
+            })
+            overlayElement.style.display = "none";
         }
 
         const boardElement = document.querySelector('.board');
@@ -61,8 +69,7 @@ $(document).ready(function() {
         const MATCH_ID = parseInt(localStorage.getItem('tictax_match_id'))
 
         var socket = undefined;
-
-        // elem.html('<strong>abc</abc>');
+        var opponent = ""
 
         const initSocket = (address) => {
 
@@ -96,7 +103,101 @@ $(document).ready(function() {
 
             // Listen for messages
             socket.addEventListener('message', function(event) {
-                console.log(event.data);
+                let data = null;
+                // Validate message to check if it really
+                // is a game message.
+                console.log('received:', event.data);
+                try {
+                    data = JSON.parse(event.data);
+                    if (!data.hasOwnProperty('type')) {
+                        throw Error('Message was parsed correctly, but it doesn\'t contain attribute "type"');
+                    }
+                } catch (error) {
+                    console.log("Unrecognized message:", event.data);
+                    console.log(error);
+                    return;
+                }
+
+                // Process game logic
+                switch (data.type) {
+                    case protoMsgTypes.GAME_BEGIN:
+                        {
+                            // Game has just started
+                            // Let the user know whether it's their time
+                            // to make a move
+                            $('#player1').text(username);
+                            $('#player2').text(data.opponent);
+
+                            opponent = data.opponent;
+
+                            if (data.isYourTurn) {
+                                $('#txtGameMessage').text('It\'s your turn');
+                            } else {
+                                $('#txtGameMessage').text('Waiting for your opponent\'s first move');
+                            }
+
+                            break;
+                        }
+                    case protoMsgTypes.GAME_STATE:
+                        {
+                            if (data.validMoves.length < 9) {
+                                console.log('Valid moves less than 9');
+                                // Hide message about whose turn it is
+                                // once at least one move was made.
+                                $('#txtGameMessage').text('');
+                            }
+
+                            // Render board based on the state
+                            for (let i = 0; i < data.board.length; ++i) {
+                                for (let j = 0; j < data.board[i].length; ++j) {
+                                    squareElements[i * 3 + j].innerHTML = data.board[i][j];
+                                }
+                            }
+                            break;
+                        }
+                    case protoMsgTypes.GAME_END:
+                        {
+                            // Game ended, display winner 
+
+                            // Check if it's a tie or someone has won
+                            if (data.isTie) {
+                                $('#txtGameMessage').text('IT\'S A TIE!');
+                            } else {
+                                if (data.winner === username) {
+                                    // You are a winner                                    
+                                    $('#txtGameMessage').text(`YOU WON!`);
+                                } else {
+                                    $('#txtGameMessage').text(`${data.winner} WON!`);
+                                }
+                            }
+
+                            // Update score
+                            $('#player1Score').html(`<strong>${data.score[username]}</strong>`)
+                            $('#player2Score').html(`<strong>${data.score[opponent]}</strong>`)
+
+                            break;
+                        }
+                    case protoMsgTypes.PLAYER_DISCONNECTED:
+                        {
+                            // Opponent disconnected
+                            if (data.gotoLobby) {
+                                backToLobby();
+                                return;
+                            } else {
+                                $('#txtGameMessage').text('Waiting for someone to join');
+                            }
+                            break;
+                        }
+                    case protoMsgTypes.ERROR:
+                        {
+                            // Received an error.
+                            showError(data.message);
+                            break;
+                        }
+
+                    default:
+                }
+
             });
 
             // Listen for messages
@@ -108,7 +209,7 @@ $(document).ready(function() {
                 console.log('code: ' + code);
                 console.log('reason: ' + reason);
 
-                back_to_lobby();
+                backToLobby();
             });
 
             socket.addEventListener('error', function(event) {
@@ -119,38 +220,21 @@ $(document).ready(function() {
 
         }
 
-
-        function handleClick(e, i) {
-            if (squares[i] === null && winner === null) {
-                squares[i] = isXNext ? 'X' : 'O';
-                isXNext = !isXNext;
-                e.innerHTML = squares[i];
-            }
-        }
-
-        function resetGame() {
-            squareElements.forEach(square => {
-                square.textContent = "";
-            })
-            overlayElement.style.display = "none";
-        }
-
         $('button[cell]').click(function() {
             elem = $(this);
             let i = parseInt(elem.attr('cell'))
 
-            try {
-
-                socket.send(JSON.stringify({
-                    type: protoMsgTypes.PLAY_MOVE,
-                    matchId: MATCH_ID,
-                    cell: i
-                }));
-
-            } catch (error) {
-                console.log(error);
-                showError(error);
+            // Client move validity check
+            if (elem.html() !== '') {
+                console.log("Client validity check")
+                return;
             }
+
+            socket.send(JSON.stringify({
+                type: protoMsgTypes.PLAY_MOVE,
+                matchId: MATCH_ID,
+                cell: i
+            }));
 
         })
 
@@ -158,7 +242,7 @@ $(document).ready(function() {
             socket.send(JSON.stringify({
                 type: protoMsgTypes.LEAVE_MATCH
             }));
-            back_to_lobby();
+            backToLobby();
         });
 
         try {
@@ -170,45 +254,3 @@ $(document).ready(function() {
 
     });
 });
-
-// var socket = undefined;
-// const WS_ADDRESS = 'ws://127.0.0.1:13024';
-
-// const initSocket = (address) => {
-
-//     if (socket != null && socket.readyState === socket.OPEN) {
-//         socket.close();
-//     }
-
-//     // Create WebSocket connection.
-//     socket = new WebSocket(address);
-
-//     // Connection opened
-//     socket.addEventListener('open', function(event) {
-//         socket.send('{"type": "auth", "token": ""}');
-//     });
-
-//     // Listen for messages
-//     socket.addEventListener('message', function(event) {
-//         console.log('Message from server ', event.data);
-//     });
-
-//     // Listen for messages
-//     socket.addEventListener('close', function(event) {
-//         console.log('## CLOSED ##');
-//         const reason = event.reason;
-//         const code = event.code;
-
-//         console.log('code: ' + code);
-//         console.log('reason: ' + reason);
-//     });
-
-//     // Listen for messages
-//     socket.addEventListener('error', function(event) {
-//         console.log('## ERROR ##');
-//         console.log(event)
-//     });
-
-// }
-
-// initSocket(WS_ADDRESS);

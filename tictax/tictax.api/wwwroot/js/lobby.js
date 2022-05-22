@@ -63,7 +63,7 @@ $(document).ready(function() {
             return
         }
 
-        const initGameData = (matchId, isOwner) => {
+        const initGameData = async(matchId, isOwner) => {
             // Initializes required local storage items to prepare
             // client for connection with the game server.
             // Returns true if successful at doing so.
@@ -71,12 +71,12 @@ $(document).ready(function() {
 
             // Get WS Host
             const body = {
-                MatchId: matchId
+                matchId: matchId
             };
 
             let isError = false;
 
-            fetch('/api/matches', {
+            await fetch('/api/matches', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: {
@@ -91,12 +91,13 @@ $(document).ready(function() {
                     return resp.json();
                 })
                 .then(data => {
-                    console.log("server host:", data.wsServerHost);
+                    console.log("##### recv:", data);
                     localStorage.setItem('tictax_game_server', data.wsServerHost);
                     localStorage.setItem('tictax_match_id', data.matchId);
                 })
                 .catch(err => {
                     isError = true;
+                    console.log("#### ROOM JOIN ERROR");
                     console.log(err);
                     showError(err);
                 });
@@ -109,12 +110,12 @@ $(document).ready(function() {
             window.location.href = './index.html';
         });
 
-        $("#roomTable").on('click', 'button[class*=\'join-btn\']', function() {
+        $("#roomTable").on('click', 'button[class*=\'join-btn\']', async function() {
             elem = $(this);
             matchId = parseInt(elem.attr('data'));
             console.log("join ->", matchId);
 
-            if (initGameData(matchId, false)) {
+            if (await initGameData(matchId, false)) {
                 // Redirect to game.html
                 window.location.href = './game.html';
             }
@@ -171,8 +172,8 @@ $(document).ready(function() {
                 })
         });
 
-        $('#cmdCreateRoom').click(function() {
-            if (initGameData(0, true)) {
+        $('#cmdCreateRoom').click(async function() {
+            if (await initGameData(0, true)) {
                 // Redirect to game.html
                 window.location.href = './game.html';
             }
