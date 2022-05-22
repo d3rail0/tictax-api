@@ -109,6 +109,12 @@ $(document).ready(function() {
             localStorage.setItem('tictax_jwt_token', null);
             window.location.href = './index.html';
         });
+        $('#cmdProfile').click(function() {
+            let searchParams = new URLSearchParams();
+            let username = localStorage.getItem('tictax_username');
+            searchParams.set('player', username);
+            window.location.href = './profile.html?' + searchParams.toString();
+        });
 
         $("#roomTable").on('click', 'button[class*=\'join-btn\']', async function() {
             elem = $(this);
